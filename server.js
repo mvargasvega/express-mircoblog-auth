@@ -1,11 +1,22 @@
 // require express and other modules
 var express = require("express"),
-  app = express(),
-  bodyParser = require("body-parser"),
-  methodOverride = require("method-override");
+    app = express(),
+    bodyParser = require("body-parser"),
+    methodOverride = require("method-override"),
+
+    //  NEW ADDITIONS
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy;
 // require Post model
 var db = require("./models"),
   Post = db.Post;
+
+// require Post and User models
+var db = require("./models"),
+    Post = db.Post,
+    User = db.User;
 
 // configure bodyParser (for receiving form data)
 app.use(bodyParser.urlencoded({ extended: true, }));
@@ -18,6 +29,22 @@ app.set("view engine", "ejs");
 
 app.use(methodOverride("_method"));
 
+
+// middleware for auth
+app.use(cookieParser());
+app.use(session({
+  secret: 'supersecretkey', // change this!
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// passport config
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // HOMEPAGE ROUTE
 
